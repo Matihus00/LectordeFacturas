@@ -29,10 +29,11 @@ for carpeta in sorted(os.listdir(ruta_principal)):
                 print(f"📄 Procesando factura PDF: {ruta_archivo}")
 
                 try:
+                    # Extraer texto y procesar con funciones
                     if funciones.tiene_imagenes_pdf(ruta_archivo):
-                        encabezado, productos_df = funciones.extraer_texto_pdf_con_imagenes(ruta_archivo)
+                        encabezado, productos_df, respuesta_ollama = funciones.extraer_texto_pdf_con_imagenes(ruta_archivo)
                     else:
-                        encabezado, productos_df = funciones.extraer_texto_pdf(ruta_archivo)
+                        encabezado, productos_df, respuesta_ollama = funciones.extraer_texto_pdf(ruta_archivo)
 
                     # Imprimir encabezado y productos para depuración
                     print("Encabezado:")
@@ -46,6 +47,10 @@ for carpeta in sorted(os.listdir(ruta_principal)):
                     if productos_df.empty:
                         print(f"⚠️ No se encontraron productos en el archivo {archivo}.")
                         continue
+
+                    # Procesar la respuesta de Ollama si es necesario
+                    if respuesta_ollama:
+                        print("Respuesta de Ollama:", respuesta_ollama)
 
                     # Agregar los productos al DataFrame general
                     facturas_dataframes.append(productos_df)
@@ -65,7 +70,7 @@ else:
 columnas_a_normalizar = ['cantidad', 'precio_unitario', 'precio_total', 'fecha_factura', 'descripcion', 'proveedor']
 for columna in columnas_a_normalizar:
     if columna in df.columns:
-        if columna in ['cantidad','precio_unitario','precio_total']:
+        if columna in ['cantidad', 'precio_unitario', 'precio_total']:
             df[columna] = pd.to_numeric(df[columna].astype(str).str.replace(",", "."), errors='coerce')
         elif columna == 'fecha_factura':
             df[columna] = pd.to_datetime(df[columna], errors='coerce')
@@ -74,7 +79,7 @@ for columna in columnas_a_normalizar:
     else:
         print(f"⚠️ La columna '{columna}' no existe en el DataFrame.")
 
-df.fillna({'cantidad': 0,'precio_unitario': 0,'precio_total': 0,'descripcion':'Sin descripción', 'proveedor': 'Desconocido'}, inplace=True)
+df.fillna({'cantidad': 0, 'precio_unitario': 0, 'precio_total': 0, 'descripcion': 'Sin descripción', 'proveedor': 'Desconocido'}, inplace=True)
 
 engine = create_engine("sqlite:///facturas.db")
 try:
