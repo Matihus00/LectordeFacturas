@@ -11,7 +11,7 @@ def estructurar_texto(texto):
         Tu tarea es **convertir el texto de una factura en una tabla CSV**, usando **punto y coma (;)** como separador. Sigue estrictamente las instrucciones y no incluyas explicaciones, encabezados duplicados ni texto adicional.
 
         ⚠️ **Instrucciones importantes:**
-        1. Devuelve solo los datos solicitados en el siguiente orden, con una única línea de encabezado:
+        1. Devuelve solo los datos solicitados en el siguiente orden, con una única línea de encabezado,Sin datos adicionales ni explicaciones solo los datos solicitados:
            
 fecha_factura;proveedor;cantidad;precio_unitario;precio_total;descripcion
 
