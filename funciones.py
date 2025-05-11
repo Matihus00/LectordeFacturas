@@ -6,6 +6,7 @@ import pytesseract
 from PIL import Image
 import io
 import sqlite3
+import re
 
 # Cargar variables de entorno desde el archivo .env
 load_dotenv(".env")
@@ -53,10 +54,8 @@ def limpiar_texto(texto):
     Limpia el texto eliminando caracteres no deseados, normalizando espacios,
     y corrigiendo errores comunes en los datos extraídos del OCR.
     """
-    import re
-
-    # Eliminar caracteres no deseados (incluyendo los nuevos símbolos especificados)
-    texto = re.sub(r"[^\w\s.,;:/-]", "", texto)  # Mantiene solo caracteres alfanuméricos y algunos símbolos básicos
+    # Eliminar caracteres no deseados
+    texto = re.sub(r"[^\w\s.,;:/-]", "", texto)
     texto = texto.replace("~", "").replace("“", "").replace("”", "").replace("™", "")
     texto = texto.replace("=", "").replace("*", "").replace("$", "").replace("@", "")
     texto = texto.replace("/", "").replace("«", "").replace("»", "")
@@ -70,7 +69,7 @@ def limpiar_texto(texto):
     # Eliminar líneas vacías o con solo espacios
     lineas = [linea.strip() for linea in texto.split("\n") if linea.strip()]
 
-    # Opcional: Corregir errores comunes en palabras clave
+    # Corregir errores comunes en palabras clave
     texto_limpio = "\n".join(lineas)
     texto_limpio = texto_limpio.replace("prooveedor", "proveedor")
     texto_limpio = texto_limpio.replace("precio_unitarrio", "precio_unitario")
@@ -88,13 +87,13 @@ def limpiar_csv(csv_texto):
     if lineas_limpias:
         lineas_limpias[0] = ";".join([
             col.strip()
-               .replace("prooveedor","proveedor")
+               .replace("prooveedor", "proveedor")
                .replace("precio_unitarrio", "precio_unitario")
                .lower()  # Fuerza minúsculas para evitar diferencias
             for col in lineas_limpias[0].split(";")
         ])
     return "\n".join(lineas_limpias)
-    
+
 def verificar_columnas(df, columnas_necesarias):
     """Verifica si las columnas necesarias existen en el DataFrame."""
     if df.empty:

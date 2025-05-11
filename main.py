@@ -29,38 +29,34 @@ for carpeta in sorted(os.listdir(ruta_principal)):
                 print(f"📄 Procesando factura PDF: {ruta_archivo}")
 
                 try:
+                    # Extraer texto del PDF
                     if funciones.tiene_imagenes_pdf(ruta_archivo):
                         texto_no_estructurado = funciones.extraer_texto_pdf_con_imagenes(ruta_archivo)
                     else:
                         texto_no_estructurado = funciones.extraer_texto_pdf(ruta_archivo)
 
-                    # Limpiar el texto extraído
-                    texto_limpio = funciones.limpiar_texto(texto_no_estructurado)
-
-                    # Imprimir el texto limpio para depuración
-                    print(f"🔄 Texto limpio extraído del archivo {archivo}:\n{texto_limpio}")
-
                     # Usar estructurar_texto desde Ollama
-                    csv_respuesta = estructurar_texto(texto_limpio)
+                    csv_respuesta = estructurar_texto(texto_no_estructurado)
 
                     if not csv_respuesta:
                         print(f"⚠️ No se pudo procesar el archivo {archivo}.")
                         continue
 
-                    csv_respuesta = funciones.limpiar_csv(csv_respuesta)
-
                     try:
+                        # Convertir la respuesta de Ollama en un DataFrame
                         df_factura = pd.read_csv(StringIO(csv_respuesta), delimiter=";", dtype=str)
                         df_factura.columns = df_factura.columns.str.strip().str.lower()
                         print("🧾 Columnas encontradas en el DataFrame:", df_factura.columns.tolist())
- 
-                        columnas_necesarias = ['cantidad','precio_unitario', 'precio_total', 'descripcion', 'fecha_factura', 'proveedor']
+
+                        # Verificar columnas necesarias
+                        columnas_necesarias = ['cantidad', 'precio_unitario', 'precio_total', 'descripcion', 'fecha_factura', 'proveedor']
                         columnas_faltantes = funciones.verificar_columnas(df_factura, columnas_necesarias)
 
                         if columnas_faltantes:
                             print(f"⚠️ Faltan las siguientes columnas en el DataFrame: {columnas_faltantes}")
                             continue
 
+                        # Convertir columnas numéricas
                         for columna in ['cantidad', 'precio_unitario', 'precio_total']:
                             df_factura[columna] = pd.to_numeric(df_factura[columna].str.replace(",", "."), errors='coerce')
 
@@ -85,7 +81,7 @@ else:
 columnas_a_normalizar = ['cantidad', 'precio_unitario', 'precio_total', 'fecha_factura', 'descripcion', 'proveedor']
 for columna in columnas_a_normalizar:
     if columna in df.columns:
-        if columna in ['cantidad','precio_unitario','precio_total']:
+        if columna in ['cantidad', 'precio_unitario', 'precio_total']:
             df[columna] = pd.to_numeric(df[columna].astype(str).str.replace(",", "."), errors='coerce')
         elif columna == 'fecha_factura':
             df[columna] = pd.to_datetime(df[columna], errors='coerce')
@@ -94,8 +90,10 @@ for columna in columnas_a_normalizar:
     else:
         print(f"⚠️ La columna '{columna}' no existe en el DataFrame.")
 
-df.fillna({'cantidad': 0,'precio_unitario': 0,'precio_total': 0,'descripcion':'Sin descripción', 'proveedor': 'Desconocido'}, inplace=True)
+# Rellenar valores faltantes
+df.fillna({'cantidad': 0, 'precio_unitario': 0, 'precio_total': 0, 'descripcion': 'Sin descripción', 'proveedor': 'Desconocido'}, inplace=True)
 
+# Guardar en la base de datos
 engine = create_engine("sqlite:///facturas.db")
 try:
     df.to_sql("facturas", engine, if_exists="append", index=False)
