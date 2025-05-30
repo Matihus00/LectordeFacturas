@@ -1,0 +1,38 @@
+# .gitignore para proyecto Python de facturación
+
+# Archivos y carpetas de Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Entornos virtuales
+env/
+venv/
+.venv/
+
+# Configuración de entorno
+.env
+.env.*
+
+# Bases de datos
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Configuración de IDEs
+.vscode/
+.idea/
+
+# Salida de Jupyter
+.ipynb_checkpoints/
+
+# Datos reales o ejemplos (ajusta según tus carpetas)
+facturas/
+Facturas/

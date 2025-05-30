@@ -10,7 +10,7 @@ from Ollama_utils import estructurar_texto  # Importar desde Ollama
 funciones.crear_tabla_sqlite()
 
 # Ruta de la carpeta principal de facturas
-ruta_principal = r"C:\Users\matia\OneDrive\Desktop\Facturas\facturas"
+ruta_principal = os.getenv("FACTURAS_PATH", "facturas")
 
 # Lista para almacenar los DataFrames de las facturas
 facturas_dataframes = []
